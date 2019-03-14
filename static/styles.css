@@ -1,0 +1,35 @@
+.container {
+    width: 500px;
+    /* background-color: red; */
+    margin: 0 auto;
+    display: inline-block;
+    vertical-align: top;
+}
+
+input {
+    width: 400px;
+    margin-bottom: 20px;
+    display: block;
+}
+
+.button {
+    background-color: green;
+    color: white;
+    width: 100px;
+    padding: 5px;
+    border-radius: 5px;
+}
+h1 {
+    margin-left: 15px;
+    margin-bottom: 20px;
+}
+
+.success {
+    color: green;
+    font-size: 10pt;
+}
+.error {
+    color: red;
+    font-size: 10pt;
+    font-weight: bold;
+}
