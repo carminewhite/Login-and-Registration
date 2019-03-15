@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="X-UA-Compatible" content="ie=edge">
+        <title>Wall One</title>
+        <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+        <link rel="stylesheet" href="static/styles.css">
+    </head>
+</head>
+<body>
+    <div class="header">
+        <h1>CodingDojo Wall</h1>
+        <h4>Welcome {{ session['user']['fname'] }}</h4>
+        <a href="/destroy_session">Log Out</a>
+    </div>
+
+    <div class="container">
+        <div class="messages">
+            <h4>{{ num_msgs }} Message(s) for You</h4>
+            {% for each_comment in dbmsgs %}
+                <div class="indiv-msgs">
+                    <p>{{ each_comment.first_name }} said (3hrs ago)</p><br>
+                    <p class="msgs-indent">{{ each_comment.comment }}</p>
+                    <input name="comment_id" type="hidden" value={{ each_comment.id }}>
+                </div>
+                <a href="/delete-messages/{{ each_comment.id }}"><img class="trash" src="static/img/trash.png"></a>
+            {% endfor %}
+            
+
+        </div>
+        <div class="vl"></div>
+        <div class="messages">
+            {% with messages = get_flashed_messages() %}     <!-- declare a variable called messages -->
+                {% if messages %}                            <!-- check if there are any messages -->
+                    {% for message in messages %}            <!-- loop through the messages -->
+                        <p class ="error">{{message}}</p>                   <!-- display each message in a paragraph tag -->
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+            <h4>Send messages</h4>
+            <p>You have sent {{ snt_msg_cnt }} messages so far</p>
+            <div>
+
+                {% for name in dbusers %}
+                    <form action='/send-messages' method="POST">
+                        <p class="pushright">{{ name.first_name }}</p>
+                        <textarea name="comment"></textarea>
+                        <input name="id_hidden" type="hidden" value={{ name.id }}>
+                        <input class="send" type="submit" value="Send">
+                    </form>
+                {% endfor %}
+
+            </div>
+        </div>
+    </div>
+</body>
+</html>

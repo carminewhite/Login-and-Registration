@@ -60,7 +60,7 @@ def verify_email():
 
         #********** if all form data is validated, FIRST:  double check if user email already in the database. ************#
         #if there is actually a user
-        mysql = connectToMySQL('login_reg_db')
+        mysql = connectToMySQL('dojowall_db')
         query = "SELECT * FROM users WHERE email = %(e)s;"
         data = {
             "e" : request.form["email"],
@@ -84,7 +84,7 @@ def verify_email():
                 "e" : request.form["email"],
                 "pw" : pw_hash
             }
-            mysql = connectToMySQL('login_reg_db')
+            mysql = connectToMySQL('dojowall_db')
             print(mysql.query_db(query, data))
             flash("You have been successfully registered!", 'success')
             return render_template("success.html", user = user)
@@ -120,27 +120,26 @@ def verify_logged_in_email():
         }
         return redirect('/')
     else:
-        mysql = connectToMySQL('login_reg_db')
+        mysql = connectToMySQL('dojowall_db')
         query = "SELECT * FROM users WHERE email = %(e)s;"
         data = {
             "e" : request.form["login_email"],
         }
         result = mysql.query_db(query, data)
-        print(result)
         if len(result) > 0:
             if bcrypt.check_password_hash(result[0]['password'], request.form['login_password']):
                 session['user'] = { 
                     "logged_in" : True,
                     "userid" : result[0]['id'],
+                    "email" : result[0]['email'],
                     "fname" : result[0]['first_name']
                 }
-                user = session['user']
-                print(user)
-                return render_template("success.html", user = user)
+                
+
+                return redirect('/wall')
         else:
             flash("You could not be logged in", 'login')
     return redirect('/') 
-
 
 @app.route('/destroy_session')
 def destroy_session_registration():
@@ -151,8 +150,76 @@ def destroy_session_registration():
 
 
 
+#*********** starting wall coding **************
+
+@app.route("/wall")
+def wall():
+    user = session['user']
+    #if session (count sent messages) exists, ignore it otherwise set it to zero
+    if 'snt_msg_cnt' in session:
+        pass
+    else: session['snt_msg_cnt'] = 0
+        
+    if user['logged_in']:
+        print(f"user {user['fname']} (user id: {user['userid']}) is logged in")
+        #pull all users from the database
+        mysql = connectToMySQL('dojowall_db')
+
+        query = "SELECT id, first_name FROM users WHERE id != " + str(user['userid']) + " ORDER BY first_name"
+        users_result = mysql.query_db(query)
+        
+        mysql = connectToMySQL('dojowall_db')
+        #pull in all messages
+        # query = "SELECT id, sender_id, comment FROM messages WHERE reciever_id = " + str(session['user']['userid'])
+        query = "SELECT messages.id, sender_id, first_name, comment FROM messages INNER JOIN users ON messages.sender_id = users.id WHERE reciever_id = " + str(session['user']['userid'])
+        msgs_result = mysql.query_db(query) 
+        print ("*"*50, "\nINNER JOIN query produced: ", users_result)
+        num_msgs = (len(msgs_result))
+        return render_template("wall.html", dbusers = users_result, dbmsgs = msgs_result, num_msgs = num_msgs, snt_msg_cnt = session['snt_msg_cnt'])
+
+    else:
+        return redirect('/destroy_session')
+
+@app.route("/send-messages", methods=['POST'])
+def send_msgs():
+    #verify messages meet requirements:
+    if int(len(request.form['comment'])) < 5:
+        flash("Must use at least 5 characters")
+    else:
+        query = "INSERT INTO messages (sender_id, reciever_id, comment) VALUES (%(sid)s, %(hid)s, %(cmt)s);"
+        data = {
+            "sid" : session['user']['userid'],
+            "hid" : request.form["id_hidden"],
+            "cmt" : request.form["comment"],
+        }
+        mysql = connectToMySQL('dojowall_db')
+        result = mysql.query_db(query, data)
+        print ("inserted into the DB: ", result )
+        session['snt_msg_cnt'] = session['snt_msg_cnt'] + 1
+    return redirect('/wall')
 
 
+@app.route("/delete-messages/<comment_id>")
+def delete_msgs(comment_id):
+    #if someone accesses the route without being the user in session, reroute:
+    #check if the userid of the comment id is the same as the person in the session.  If not then reroute
+    query = "SELECT reciever_id FROM messages WHERE id = " + str(comment_id)
+    mysql = connectToMySQL('dojowall_db')
+    result = mysql.query_db(query)
+    print("/"*100, "\nResult: ", result)
+    if result[0]['reciever_id'] == session['user']['userid']:
+        query = "DELETE FROM messages WHERE id = " + str(comment_id)
+        mysql = connectToMySQL('dojowall_db')
+        result = mysql.query_db(query)
+        print ("deleted from the DB: ", result )
+        return redirect('/wall')
+    else:
+        return redirect('/danger')
+
+@app.route("/danger")
+def danger():
+    
+    return render_template("danger.html")
 
 
 

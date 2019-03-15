@@ -1,8 +1,7 @@
 .container {
-    width: 500px;
+    width: 1050px;
     /* background-color: red; */
     margin: 0 auto;
-    display: inline-block;
     vertical-align: top;
 }
 
@@ -32,4 +31,75 @@ h1 {
     color: red;
     font-size: 10pt;
     font-weight: bold;
+}
+
+
+.header {
+    background-color: lightgray;  
+    border-bottom: 1px solid black; 
+}
+    .header h1 {
+        display: inline-block;
+    }
+    .header h4 {
+        right: 90px;
+        position: absolute;
+        line-height: 60px;
+        display: inline;
+    }
+    .header a {
+        display: inline;
+        margin-left: 10px;
+        right: 10px;
+        position: absolute;
+        line-height: 64px;
+    }
+
+.messages {
+    width: 500px;
+    /* background-color: tomato; */
+    margin: 0 auto;
+    display: inline-block;
+    vertical-align: top;
+    padding: 10px;
+}
+    .messages .indiv-msgs {
+        width: 350px;
+        display: inline-block;
+    }
+
+    .messages .msgs-indent {
+        margin-left: 30px;
+    }
+
+    .messages p {
+        display: inline-block;
+    }
+
+    .messages .send {
+        width: 90px;
+        margin-bottom: 20px;
+        display: inline-block;
+        vertical-align: top;
+        margin-top: 10px;
+    }
+
+    .messages .pushright {
+        width: 80px;
+        vertical-align: top;
+    }
+
+.trash {
+    width: 30px;
+    margin-left: 10px;
+    display: inline-block;
+    margin-bottom: 20px;
+}
+
+
+.vl {
+    border-left: 6px solid gray;
+    height: 500px;
+    display: inline-block;
+    vertical-align: top;
 }
